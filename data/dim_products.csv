@@ -1,0 +1,31 @@
+product_id,product_category,product_subcategory
+P001,Electronics,Accessories
+P002,Electronics,Accessories
+P003,Electronics,Accessories
+P004,Electronics,Accessories
+P005,Electronics,Audio
+P006,Electronics,Audio
+P007,Electronics,Audio
+P008,Electronics,Audio
+P009,Electronics,Home Tech
+P010,Electronics,Home Tech
+P011,Electronics,Home Tech
+P012,Electronics,Home Tech
+P013,Kitchenware,Cookware
+P014,Kitchenware,Cookware
+P015,Kitchenware,Cookware
+P016,Kitchenware,Cookware
+P017,Kitchenware,Cutlery
+P018,Kitchenware,Cutlery
+P019,Kitchenware,Cutlery
+P020,Kitchenware,Cutlery
+P021,Kitchenware,Small Appliances
+P022,Kitchenware,Small Appliances
+P023,Kitchenware,Small Appliances
+P024,Kitchenware,Small Appliances
+P025,Furniture,Living Room
+P026,Furniture,Living Room
+P027,Furniture,Bedroom
+P028,Furniture,Bedroom
+P029,Furniture,Office
+P030,Furniture,Office
