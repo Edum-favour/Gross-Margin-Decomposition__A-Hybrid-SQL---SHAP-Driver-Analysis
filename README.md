@@ -183,7 +183,7 @@ shap.dependence_plot(
     feature_names=feature_names
 )
 ```
-![SHAP Summary Plot](assets\SHAP_Summary_Plot.png)
+![SHAP Summary Plot](assets)
 
 ### **Key Findings**
 
