@@ -1,22 +1,6 @@
 # Gross Margin Decomposition: A Hybrid SQL & SHAP Driver Analysis
-##  Executive Summary
-Revenue increased from $16.52M in 2024 to $19.00M in 2025, yet gross margin declined from 36% to 32%, while gross profit increased only modestly from $6.00M to $6.11M.
-
-This project investigates why stronger revenue performance failed to translate into proportional gross-profit growth.
-
-The analysis combines:
-- SQL-based Price-Volume-Mix-Cost(PVMC) decomposition to quantify the financial drivers of year-over-year gross profit movement.
-- Product-level decomposition to identify the SKUs and categories responsible for deterioration or improvement.
-XGBoost with SHAP analysis to test whether changes in unit cost, pricing and discounting exhibit meaninful nonlinear relationships with transaction-level margin deterioration.
-
-The analysis finds that volume growth was the principal positive contributor to gross profit, but much of its benefit was absorbed by rising costs and adverse product mix. At product level, the largest deteriorations were concentrated in Electronics, while several small Appliance SKUs benefited from favorable mix and demand growth.
-
-The nonlinear analysis found predominantly monotonic, near-linear relationships rather than robust operating thresholds.
-
-Consequently, the recommendations focus on targeted cost recovery, profitable product mix and SKU-specific margin controls rather than arbitrary universal discount limits.
-
-## Business Problem
-The business generated substantial revenue growth between 2024 and 2025, but the quality of that growth deteriorated
+## Problem Statement
+Between 2024 and 2025, the business experienced strong top-line revenue growth from $16.52M to $19.00M (+15%). However, profitability severly lagged: gross profit grew by only $110K (from $6.00M to $6.11M), and gross margin compressed by 400 basis points from 36% down to 32%.
 
 | Metric | 2024 | 2025 |
 |---|---:|---:|
@@ -24,28 +8,32 @@ The business generated substantial revenue growth between 2024 and 2025, but the
 | Gross Profit | $6.00M | $6.11M |
 | Gross Margin | 36% | 32% |
 
-The central business question is:
+This divergence reveals a core growth-quality problem: top-line expansion was absorbed by hidden operational pressures rather than translating into proportional bottom-line value.
 
->**What is driving deterioration in gross margin performance despite revenue growth, where is the pressure concentrated, and are there nonlinear operating thresholds that management should consider?**
+## Key Analytical Questions
+1. Financial Drivers (what changed?)
+2. Product Attribution (Where did it change?)
+3. Behavioral Thresholds (How do variables interact?)
 
-This was investigated thrpugh three progressively deeper analytical layers:
 
-1. What changed financially?
+## Objectives
+To resolve this growth-quality gap, this project implements a two-tiered analytical framework combining determinitive SQL-based acounting with supervised machine learning interpretability (XGBoost + SHAP) to:
 
-Decompose gross-profit movement into price, volume, mix and cost effects.
+- Execute Price-Volume-Mix-Cost(PVMC) Decomposition:
+Quantify the exact dollar contribution of volume, realized price, product mix shifts, and unit cost changes to isolate the primary financial drivers of gross-profit deterioration.
 
-2. Where did it change?
+- Perform SKU & Category Contribution Analysis:
+Attribute gross-profit changes to specific products and categories to identify which SKUs drive severe margin compression versus those driving profitable expansion.
 
-Identify the products and categories responsible for the strongest positive and negative contributions.
+- Evaluate Nonlinear Operational Thresholds: 
+Train and interpret an XGBoost regression model using SHAP dependence analysis to test whether changes in pricing, discounts, or unit costs exhibit nonlinear thresholds that should govern discounting policies.
 
-3. How do the underlying operating changes relate to margin deterioration?
 
-Test whether cost, pricing and discount movements exhibit meaningful nonlinear behaviour or threshold effects.
 
-## Analytical Approach
-### 1. Financial Baseline
+## Analytical Approach & Findings
+### 1. Financial Baseline Analysis
 
-Annual financial performance was first compared to establish the scale of the problem.
+SQL aggregation established the scale of margin compression.
 
 ```sql
 SELECT
@@ -61,13 +49,13 @@ ORDER BY
     year;
 ```
 
-Although revenue increased substantially in 2025, gross profit increased by only approximately $102K, while gross margin fell by 4 percentage points.
-
 This established the need to determine which economic forces were absorbing the benefit of revenue growth.
 
 ### 2. Price–Volume–Mix–Cost Decomposition
 
-A PVMC bridge was aggregated to the business level.
+A mathematical bridge decomposed gross-profit movements into four explicit accounting mechanics.
+
+ΔGross Profit = ΔVolume + ΔRealized Profit + ΔMix + ΔCost
 
 ```sql
 SELECT
@@ -81,96 +69,34 @@ CROSS JOIN totals t;
 
 The decomposition attributed the movement in gross profit to four components:
 
-| Driver | Gross Profit Impact |
-|---|---:|
-| Volume | +$936.6K |
-| Realized Price | +$135.1K |
-| Mix | -$110.8K |
-| Cost | -$859.1K |
+| Driver | Gross Profit Impact | Key Insight |
+|---|---:|---|
+| Volume | +$936.6K | Strong demand; volume expanded substantially YoY. |
+| Realized Price | +$135.1K | Modest list price adjustments offered minor support. |
+| Mix | -$110.8K | Shift in customer purchases towards lower-margin SKUs. |
+| Cost | -$859.1K | Unit cost inflation absorbed 91.7% of volume profit gains. |
 
-### Key finding
-The business generated substantial incremental profit through higher sales volume, but approximately $859K of gross-profit pressure from higher unit costs absorbed most of that benefit.
+### 3. Product-Level Contribution & SKU Mechanics
 
-Product mix created a further $111K drag, while changes in realized selling price provided only a relatively modest offset.
-
-Therefore, the central problem was not insufficient demand.
-
-It was the economics of the incremental volume being generated.
-
-### 3. Product-Level Contribution Analysis
-
-The business-level decomposition was extended to individual products to determine where the aggregate effects originated.
-
-```sql
-SELECT
-    r.product_id,
-    r.product_category,
-    r.product_subcategory,
-    r.q_24 AS units_2024,
-    r.q_25 AS units_2025,
-    ROUND(r.gp_24, 2) AS gp_2024,
-    
-    -- PVMC Drivers per Product
-    ROUND((r.q_24 * (t.vol_factor - 1)) * r.unit_gross_profit_24, 2) AS volume_effect,
-    ROUND((r.q_25 - (r.q_24 * t.vol_factor)) * r.unit_gross_profit_24, 2) AS mix_effect,
-    ROUND(r.q_25 * (r.p_25 - r.p_24), 2) AS price_effect,
-    ROUND(r.q_25 * (r.c_24 - r.c_25), 2) AS cost_effect,
-    
-    ROUND(r.gp_25, 2) AS gp_2025,
-    ROUND(r.gp_25 - r.gp_24, 2) AS gross_profit_change
-FROM sku_rates r
-CROSS JOIN totals t
-ORDER BY gross_profit_change ASC;
-```
-
-**Electronics: concentration of gross-profit deterioration:**
-
-Several of the largest gross-profit declines were concentrated in Electronics:
-
-- P011 – Home Tech: approximately −$18.7K
-- P004 – Accessories: approximately −$18.4K
-- P001 – Accessories: approximately −$15.5K
-- P009 – Home Tech: approximately −$15.3K
-- P006 – Audio: approximately −$12.4K
-
-Across these products, adverse cost effects outweighed positive contributions from volume and realized price.
-
-**Small Appliances: favourable mix and growth:**
-
-Conversely, several Small Appliance SKUs generated strong gross-profit improvement:
-
-- P021: approximately +$39.0K
-- P023: approximately +$34.9K
-- P022: approximately +$24.3K
-
-Their favourable mix effects contributed approximately +$41.9K, +$38.5K and +$31.9K, respectively, helping them absorb higher costs while still expanding gross profit.
-
-**P027: volume growth without economic improvement:**
+Extending the PVMC bridge to individual SKUs revealed key operational patterns:
+- Electronics (Concentration of Drag):
+SKUs P011 (-$18.7K), P004 (−$18.4K), P001 (−$15.5K), P009 (−$15.3K) and P006 (−$12.4K) accounted for severe profit declines due to unrecovered supplier cost spikes.
 
 
-P027 illustrates why volume alone is an insufficient performance objective.
+- Small Appliances (Favourable Mix Drivers):
+SKUs P021 (+$39.0K), P023 (+$34.9K), and P022 (+$24.3K) generated mix effects of +$41.9k, +$38.5k, and +$31.9k respectively, absorbing cost increases and boosting total profitability.
 
-The product generated approximately:
+- The P027 Pradox (Unprofitable Volume):
+P027 generated +$94.1k in volume gains but suffered a -$63.4k mix drag and -$52.2k cost inflation, leaving net gross profit -$9.1k lower than in 2024. 
+This highlights that top-line volume growth without margin controls erodes enterprise value.
 
-- +$94.1K volume effect
 
-but simultaneously experienced:
+### 4. Nonlinear Margin & ML Pipeline
+While the PVMC decomposition established the accounting drivers, a machine learning layer was developed to answer a specific operating question:
+>**Do key operating variables (pricing, costs, discounts) exhibit nonlinear relationships or critical tipping points with margin deterioration?**
 
-- −$63.4K mix effect
-- −$52.2K cost effect
-
-leaving 2025 gross profit approximately $9.1K below 2024.
-
-This demonstrates the distinction between volume growth and profitable volume growth.
-
-### 4. Nonlinear Margin Analysis
-
-The PVMC decomposition established the financial drivers of gross-profit movement.
-
-A separate machine-learning layer was then used to answer a narrower question:
-
->**Do changes in the key operating variables exhibit meaningful nonlinear relationships with margin deterioration?**
-
+### Feature Engineering & Delta Transformations
+Transaction-level metrics were calculated relative to each product's 2024 baseline to isolate operational movements:
 
 ```sql
 SELECT
@@ -179,61 +105,34 @@ SELECT
     b.base_unit_cost,
     b.base_discount_rate,
     b.base_margin_pct,
-
-    -- Unit-cost movement from product baseline
+    -- operating movements relative to 2024 product baseline
     100 * (
         tm.unit_cost
         / NULLIF(b.base_unit_cost, 0)
         - 1
     ) AS unit_cost_change_pct,
-
-    -- List-price movement from product baseline
     100 * (
         tm.unit_price
         / NULLIF(b.base_unit_price, 0)
         - 1
     ) AS list_price_change_pct,
-
-    -- Discount movement in percentage points
     100 * (
         tm.discount_rate
         - b.base_discount_rate
     ) AS discount_change_pp,
-
     -- ML target
     tm.gross_margin_pct
         - b.base_margin_pct
         AS margin_delta_pp
-
 FROM transaction_metrics AS tm
-
 INNER JOIN baseline_2024 AS b
     ON tm.product_id = b.product_id
-
 WHERE tm.year = 2025
 ```
 
-For each 2025 transaction, operating movements were calculated relative to the corresponding product's 2024 baseline:
+### Order-Level Train/Test Split
+To prevent data leakage across multi-line transactions belonging to the same purchase, the train/test split was strictly executed at the order level:
 
--unit-cost change %
--list-price change %
--discount change in percentage points
--transaction margin change in percentage points
-
-The objective of this layer was not to rediscover the accounting determinants of gross margin. Price, discount and cost are mechanically related to margin.
-
-Instead, the model was used to examine the shape of those relationships and determine whether nonlinear behaviour or operating thresholds were present.
-
-### 5. Model Development
-
-Three regression approaches were compared:
-
-- Linear Regression
-- Random Forest
-- XGBoost
-
-
-**Train/Test Split:**
 ```python
 train_orders, test_orders = train_test_split(
     ml_data['order_id'].unique(),
@@ -251,85 +150,34 @@ y_train = y.loc[train_mask]
 y_test = y.loc[test_mask]
 ```
 
-The train/test split was performed at order level, preventing transaction lines belonging to the same order from being distributed between the training and test sets.
-
-**Modeling Pipeline:**
-```python
-preprocessor = ColumnTransformer(
-    transformers=[
-        (
-            'cat', 
-            OneHotEncoder(handle_unknown='ignore',
-                          sparse_output=False
-            ), 
-            cat_features
-        ),
-        ('num', 'passthrough', num_features)
-    ]
-)
-
-xgb_pipeline = Pipeline(steps=[
-    ('preprocessor', preprocessor),
-    ('model', XGBRegressor(random_state=42))
-])
-```
-
-Initial test performance was:
+### Model Evaluation & Tuning
+Linear Regression, Random Forest, and XGBoost regressors were evaluated. Five-fold cross-validation and hyperparameter tuning produced the optimal XGBoost model:
 
 | Model | R² | RMSE |
 |---|---:|---:|
 | Linear Regression | 0.9885 | 0.3026 |
 | Random Forest | 0.9961 | 0.1759 |
-| XGBoost | 0.9960 | 0.1789 |
+| Tuned XGBoost | 0.9986 | 0.1048 |
 
 
-**Cross-Validation and Hyperparameter Tuning:**
+### 6. SHAP Relational & Dependence Analysis
+SHAP tree explainers were utilized to inspect feature rankings and evaluate relationship shapes:
+
 ```python
-xgb_search = RandomizedSearchCV(
-    estimator=xgb_pipeline,
-    param_distributions=xgb_param_grid,
-    n_iter=30,
-    cv=5,
-    scoring='neg_root_mean_squared_error',
-    random_state=42,
-    n_jobs=-1
-)
-
-xgb_search.fit(x_train, y_train)
-```
-
-Five-fold cross-validation subsequently produced the lowest average RMSE for XGBoost, after which the model was tuned using randomized hyperparameter search.
-
-The tuned model achieved:
-
-**Test R²: 0.9986**
-**Test RMSE: 0.1048 percentage points**
-
-Because the target is mathematically related to several model inputs, these performance metrics are not interpreted as evidence of novel predictive discovery. Model interpretation is instead used to evaluate relationship shape.
-
-
-### 6. SHAP Relationship Analysis
-SHAP analysis showed that the strongest modeled relationships with margin change were concentrated in:
-
-- Unit-cost change
-- Discount change
-- List-price change
-
-while product subcategory and store effects were substantially smaller.
-
-**SHAP Explainability:**
-```python
-best_xgb = xgb_search.best_estimator_
-
-preprocessor = best_xgb.named_steps['preprocessor']
-xgb_model = best_xgb.named_steps['model']
-
-x_test_transformed = preprocessor.transform(x_test)
-
+# Initialize tree explainer on tuned model
 explainer = shap.TreeExplainer(xgb_model)
 shap_values = explainer(x_test_transformed)
 
+# Inspect feature rankings
 shap.summary_plot(
+    shap_values.values, 
+    x_test_transformed, 
+    feature_names=feature_names
+)
+
+# Evaluate feature impact and probe for nonlinear thresholds
+shap.dependence_plot(
+    'discount_change_pp', 
     shap_values.values, 
     x_test_transformed, 
     feature_names=feature_names
@@ -337,75 +185,36 @@ shap.summary_plot(
 ```
 ![SHAP Summary Plot](assets\SHAP_Summary_Plot.png)
 
-SHAP dependence analysis was then used to examine whether these relationships contained meaningful nonlinear thresholds.
-```python
-shap.dependence_plot(
-    'unit_cost_change_pct', 
-    shap_values.values, 
-    x_test_transformed, 
-    feature_names=feature_names
-)
 
-shap.dependence_plot(
-    'discount_change_pp', 
-    shap_values.values, 
-    x_test_transformed, 
-    feature_names=feature_names
-)
+### **Key Findings**
 
-shap.dependence_plot(
-    'list_price_change_pct', 
-    shap_values.values, 
-    x_test_transformed, 
-    feature_names=feature_names
-)
-```
+- Feature Importance: Feature impact was heavily concentrated in unit_cost_change_pct, discount_change_pp, and list_price_change_pct. Category and store-level effects were negligible
 
-**Result:**
+- Relationship Dynamics: SHAP dependence plots confirmed that relationships were predominantly monotonic and near-linear:  
+     - Increasing unit costs drove proportional, continuous margin degradation.  
+     - Expanding discounts caused steady margin decline without abrupt threshold "cliffs"
+     - Increasing list prices were associated with improved margin outcomes.
 
-The relationships were predominantly monotonic and near-linear.
-
-- Increasing unit costs were associated with progressively greater margin deterioration.
-- Discount expansion was associated with progressively greater deterioration.
-- Increasing list prices were associated with improved margin outcomes.
-- Discount expansion showed some deviation at the extreme end, but not enough to establish a robust operating threshold.
-
-The evidence therefore did not support claiming a universal nonlinear threshold.
+- Core Takeaway: The evidence did not support claiming a universal nonlinear threshold across operating variables. Commercial governance should therefore rely on dynamic, SKU-level margin floors rather than arbitrary universal rules.
 
 ## Recommendation
 
-1. Target cost recovery in underperforming Electronics SKUs
+1. Targeted Cost Recovery in Electronics: Renegotiate procurement terms, source alternative suppliers, or selectively pass cost increases through to customers for high-drag Electronics SKUs (P011, P004, P001, P009, P006).
 
-Cost pressure is concentrated rather than uniform.
+2. Protect and Scale Small Appliances: Capitalize on strong demand and favorable mix shifts in SKUs P021, P023, and P022 by allocating marketing spend and ensuring stock availability.
 
-Prioritize supplier renegotiation, alternative sourcing and selective cost pass-through for the Electronics SKUs generating the largest cost drag rather than applying indiscriminate business-wide cost reductions.
+3. Prioritize Profitable Volume Growth: Protect top-line momentum while aligning sales growth with net profitability. Restructure commercial and supply terms for SKUs like P027 so that increasing volume builds, rather than erodes gross profit.
 
-2. Protect and selectively scale Small Appliances
-
-P021, P023 and P022 demonstrate favourable demand and mix dynamics despite cost pressure.
-
-Maintain inventory availability and commercial support for these products and favour them when allocating incremental sales effort.
-
-3. Prioritize profitable volume, particularly for P027
-
-Further volume growth should not be pursued independently of unit economics.
-
-For products such as P027, management should first improve cost recovery and/or redirect incremental demand toward more profitable products within the category.
-
-4. Introduce SKU-level margin floors for discount decisions
-
-The analysis does not support a universal discount threshold.
-
-Discount governance should therefore be based on the economics of each SKU: proposed discounts should preserve a minimum expected gross margin after considering the product's current unit cost.
+4. Implement SKU-Level Margin Floors: Replace business-wide discount thresholds with dynamic discount governance that preserves minimum gross margin requirements based on each product's unit cost.
 
 
 ## Strategic Takeaway
 
-The business does not primarily have a growth problem. It has a growth-quality problem.
+The business does not have a top-line growth problem, it has a growth-quality problem. 
 
-Higher volume generated approximately $937K in incremental gross profit, but cost pressure and adverse mix absorbed most of that benefit.
+Higher sales volume generated approximately +$937K in incremental gross profit, but unit cost inflation and adverse product mix shifts absorbed nearly all of that gain.  
 
-The commercial priority should therefore shift from maximizing sales volume to maximizing profitable volume growth; recovering costs where deterioration is concentrated, protecting favourable product mix, and governing discounts according to SKU-level margin economics.
+Commercial strategy should pair top-line expansion with strict unit-economic controls, recovering supplier costs where deterioration is concentrated, scaling high-margin SKUs, and enforcing SKU-level margin controls.  
 
 ## Tools & Technologies
 
