@@ -174,18 +174,8 @@ shap.summary_plot(
     x_test_transformed, 
     feature_names=feature_names
 )
-```
-![SHAP Summary Plot](SHAP_Summary_Plot.png)
 
-SHAP dependence analysis was then used to examine whether these relationships contained meaningful nonlinear thresholds.
-```python
-shap.dependence_plot(
-    'unit_cost_change_pct', 
-    shap_values.values, 
-    x_test_transformed, 
-    feature_names=feature_names
-)
-
+# Evaluate feature impact and probe for nonlinear thresholds
 shap.dependence_plot(
     'discount_change_pp', 
     shap_values.values, 
@@ -194,7 +184,6 @@ shap.dependence_plot(
 )
 ```
 ![SHAP Summary Plot](assets\SHAP_Summary_Plot.png)
-
 
 ### **Key Findings**
 
