@@ -335,7 +335,7 @@ shap.summary_plot(
     feature_names=feature_names
 )
 ```
-![SHAP Summary Plot](SHAP_Summary_Plot.png)
+![SHAP Summary Plot](assets/SHAP_Summary_Plot.png)
 
 SHAP dependence analysis was then used to examine whether these relationships contained meaningful nonlinear thresholds.
 ```python
