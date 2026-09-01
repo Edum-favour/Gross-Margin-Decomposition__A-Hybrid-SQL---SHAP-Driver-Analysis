@@ -8,6 +8,9 @@ Between 2024 and 2025, the business experienced strong top-line revenue growth f
 | Gross Profit | $6.00M | $6.11M |
 | Gross Margin | 36% | 32% |
 
+![Gross Margin Dashboard](assets/Gross_Margin_Dashboard.png)
+
+
 This divergence reveals a core growth-quality problem: top-line expansion was absorbed by hidden operational pressures rather than translating into proportional bottom-line value.
 
 ## Key Analytical Questions
