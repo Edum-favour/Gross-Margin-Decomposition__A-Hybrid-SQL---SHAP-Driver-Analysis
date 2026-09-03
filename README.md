@@ -26,7 +26,7 @@ The analysis is guided by three questions:
 To answer these questions, the project uses a two-tiered analytical framework:
 
 1. **Deterministic Financial Analysis:**
-A Price-Volume-Mix-Cost (PVMC) decomposition quantiifies the contribution of price, volume, product mix, and unit cost changes to explain the movement in gross profit underlying the margin compression.
+A SQL-based Price-Volume-Mix-Cost (PVMC) decomposition quantiifies the contribution of price, volume, product mix, and unit cost changes to explain the movement in gross profit underlying the margin compression.
 
 2. **Machine Learning Analysis:**
 An XGBoost regression model, interpreted using SHAP dependence analysis, tests whether changes in pricing, discounts, or unit costs exhibit nonlinear thresholds or critical tipping points.
