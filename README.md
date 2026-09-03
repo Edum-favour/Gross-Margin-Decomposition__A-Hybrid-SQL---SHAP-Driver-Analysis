@@ -1,36 +1,43 @@
 # Gross Margin Decomposition: A Hybrid SQL & SHAP Driver Analysis
 ## Problem Statement
-Between 2024 and 2025, the business experienced strong top-line revenue growth from $16.52M to $19.00M (+15%). However, profitability severly lagged: gross profit grew by only $110K (from $6.00M to $6.11M), and gross margin compressed by 400 basis points from 36% down to 32%.
+Between 2024 and 2025, the business delivered strong top-line revenue growth, with revenue increasing from $16.52M to $19.00M (+15%). However, this growth did not translate proportionally into profitability: gross profit increased by only $110K (from $6.00M to $6.11M), and gross margin declined from 36.34% to 32.14%, a 420 basis point compression.
 
-| Metric | 2024 | 2025 |
-|---|---:|---:|
-| Revenue | $16.52M | $19.00M |
-| Gross Profit | $6.00M | $6.11M |
-| Gross Margin | 36% | 32% |
+This divergence creates a fundamental profitability question:
+> **Why did substantial revenue growth produce almost no corresponding growth in gross profit?**
 
-This divergence reveals a core growth-quality problem: top-line expansion was absorbed by hidden operational pressures rather than translating into proportional bottom-line value.
-
-## Key Analytical Questions
-1. Financial Drivers (what changed?)
-2. Product Attribution (Where did it change?)
-3. Behavioral Thresholds (How do variables interact?)
+These headline metrics reveal the scale of margin compression, but not it's underlying causes. 
+Understanding what absorbed the benefit of revenue growth and where those pressures originated, is therefore the central focus of this analysis.
 
 
-## Objectives
-To resolve this growth-quality gap, this project implements a two-tiered analytical framework combining determinitive SQL-based acounting with supervised machine learning interpretability (XGBoost + SHAP) to:
+## Analytical Questions
+The analysis is guided by three questions:
+1. **Financial Drivers - what changed?**
+- What underlying economic factors explain the change in gross profit despite strong revenue growth?
 
-- Execute Price-Volume-Mix-Cost(PVMC) Decomposition:
-Quantify the exact dollar contribution of volume, realized price, product mix shifts, and unit cost changes to isolate the primary financial drivers of gross-profit deterioration.
+2. **Product Attribution - Where did it change?**
+- Which products and categories contributed most to the deterioration or improvement in profitability?
 
-- Perform SKU & Category Contribution Analysis:
-Attribute gross-profit changes to specific products and categories to identify which SKUs drive severe margin compression versus those driving profitable expansion.
-
-- Evaluate Nonlinear Operational Thresholds: 
-Train and interpret an XGBoost regression model using SHAP dependence analysis to test whether changes in pricing, discounts, or unit costs exhibit nonlinear thresholds that should govern discounting policies.
+3. **Relationship Dynamics - How did the drivers behave?**
+- Do key operating variables exhibit nonlinear relationships or critical tipping points that could inform commercial decision making?
 
 
 
-## Analytical Approach & Findings
+## Analytical Approach
+To answer these questions, the project uses a two-tiered analytical framework:
+
+1. **Deterministic Financial Analysis:**
+A Price-Volume-Mix-Cost (PVMC) decomposition quantiifies the contribution of price, volume, product mix, and unit cost changes to explain the movement in gross profit underlying the margin compression.
+
+2. **Machine Learning Analysis:**
+An XGBoost regression model, interpreted using SHAP dependence analysis, tests whether changes in pricing, discounts, or unit costs exhibit nonlinear thresholds or critical tipping points.
+
+
+## Performance Dashboard
+![Gross Margin Dashboard](assets/Gross_Margin_Dashboard.png)
+> Strong volume growth was largely offset by higher costs and adverse product mix, limiting gross profit growth.
+
+
+## Analysis & Findings
 ### 1. Financial Baseline Analysis
 
 SQL aggregation established the scale of margin compression.
@@ -48,14 +55,21 @@ GROUP BY
 ORDER BY
     year;
 ```
+| Metric | 2024 | 2025 |
+|---|---:|---:|
+| Revenue | $16.52M | $19.00M |
+| Gross Profit | $6.00M | $6.11M |
+| Gross Margin | 36.34% | 32.14% |
 
-This established the need to determine which economic forces were absorbing the benefit of revenue growth.
+Revenue increased 15.0% from $16.52M to $19.00M, while gross profit grew by only 1.7%, from $6.00M to $6.11M.
+Over the same period, gross margin declined from 36.34% to 32.14% representing a 420 basis point compression.
+
+These movements prompted a deeper examination of the economic forces underlying the margin compression.
 
 ### 2. Price–Volume–Mix–Cost Decomposition
 
-A mathematical bridge decomposed gross-profit movements into four explicit accounting mechanics.
+The PVMC decomposition isolates the year-over-year movement in gross profit across four economic drivers: price, volume, product mix, and unit cost.
 
-ΔGross Profit = ΔVolume + ΔRealized Profit + ΔMix + ΔCost
 
 ```sql
 SELECT
@@ -67,7 +81,6 @@ FROM sku_rates r
 CROSS JOIN totals t;
 ```
 
-The decomposition attributed the movement in gross profit to four components:
 
 | Driver | Gross Profit Impact | Key Insight |
 |---|---:|---|
@@ -75,6 +88,8 @@ The decomposition attributed the movement in gross profit to four components:
 | Realized Price | +$135.1K | Modest list price adjustments offered minor support. |
 | Mix | -$110.8K | Shift in customer purchases towards lower-margin SKUs. |
 | Cost | -$859.1K | Unit cost inflation absorbed 91.7% of volume profit gains. |
+
+Overall, margin compression was driven primarily by higher unit costs, with adverse product mix adding further pressure.
 
 ### 3. Product-Level Contribution & SKU Mechanics
 
@@ -91,7 +106,7 @@ P027 generated +$94.1k in volume gains but suffered a -$63.4k mix drag and -$52.
 This highlights that top-line volume growth without margin controls erodes enterprise value.
 
 
-### 4. Nonlinear Margin & ML Pipeline
+### 4. Margin Relationship & ML Analysis
 While the PVMC decomposition established the accounting drivers, a machine learning layer was developed to answer a specific operating question:
 >**Do key operating variables (pricing, costs, discounts) exhibit nonlinear relationships or critical tipping points with margin deterioration?**
 
