@@ -194,7 +194,7 @@ shap.dependence_plot(
     feature_names=feature_names
 )
 ```
-![SHAP Summary Plot](assets/2_SHAP_Summary_Plot.png)
+![SHAP Summary Plot](assets/2_SHAP_summary_plot.png)
 
 <p align="center">
   <img src="assets/3_unit_cost_change_pct.png" width="32%">
