@@ -115,11 +115,6 @@ Transaction-level metrics were calculated relative to each product's 2024 baseli
 
 ```sql
 SELECT
-    tm.*,
-    b.base_unit_price,
-    b.base_unit_cost,
-    b.base_discount_rate,
-    b.base_margin_pct,
     -- operating movements relative to 2024 product baseline
     100 * (
         tm.unit_cost
@@ -174,6 +169,7 @@ Linear Regression, Random Forest, and XGBoost regressors were evaluated. Five-fo
 | Random Forest | 0.9961 | 0.1759 |
 | Tuned XGBoost | 0.9986 | 0.1048 |
 
+>**Interpretation note:** the near-perfect predictive performance is expected given the strong mathematical relationship between gross margin and its underlying price, discount and unit cost components.
 
 ### 6. SHAP Relational & Dependence Analysis
 SHAP tree explainers were utilized to inspect feature rankings and evaluate relationship shapes:
@@ -199,6 +195,12 @@ shap.dependence_plot(
 )
 ```
 ![SHAP Summary Plot](assets/SHAP_Summary_Plot.png)
+
+<p align="center">
+  <img src="assets/unit_cost_change_pct.png" width="32%">
+  <img src="assets/discount_change_pp.png" width="32%">
+  <img src="assets/list_price_change_pct.png" width="32%">
+</p>
 
 ### **Key Findings**
 
