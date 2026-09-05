@@ -33,7 +33,7 @@ An XGBoost regression model, interpreted using SHAP dependence analysis, tests w
 
 
 ## Performance Dashboard
-![Gross Margin Dashboard](assets/Gross_Margin_Dashboard.png)
+![Gross Margin Dashboard](assets/1_Gross_Margin_Dashboard.png)
 > Strong volume growth was largely offset by higher costs and adverse product mix, limiting gross profit growth.
 
 
@@ -194,12 +194,12 @@ shap.dependence_plot(
     feature_names=feature_names
 )
 ```
-![SHAP Summary Plot](assets/SHAP_Summary_Plot.png)
+![SHAP Summary Plot](assets/2_SHAP_Summary_Plot.png)
 
 <p align="center">
-  <img src="assets/unit_cost_change_pct.png" width="32%">
-  <img src="assets/discount_change_pp.png" width="32%">
-  <img src="assets/list_price_change_pct.png" width="32%">
+  <img src="assets/3_unit_cost_change_pct.png" width="32%">
+  <img src="assets/4_discount_change_pp.png" width="32%">
+  <img src="assets/5_list_price_change_pct.png" width="32%">
 </p>
 
 ### **Key Findings**
