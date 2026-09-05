@@ -161,13 +161,14 @@ y_test = y.loc[test_mask]
 ```
 
 ### Model Evaluation & Tuning
-Linear Regression, Random Forest, and XGBoost regressors were evaluated. Five-fold cross-validation and hyperparameter tuning produced the optimal XGBoost model:
+Linear Regression was used as a linear benchmark, while XGBoost was evaluated and tuned to capture potential nonlinear relationships.
 
-| Model | R² | RMSE |
+| Model | Mean CV R² | Mean CV RMSE |
 |---|---:|---:|
-| Linear Regression | 0.9885 | 0.3026 |
-| Random Forest | 0.9961 | 0.1759 |
-| Tuned XGBoost | 0.9986 | 0.1048 |
+| Linear Regression | 0.9890 | 0.2948 |
+| XGBoost | 0.9959 | 0.1790 |
+
+Final tuned XGBoost performance on the held-out test: R² = 0.9986, RMSE = 0.1048
 
 >**Interpretation note:** the near-perfect predictive performance is expected given the strong mathematical relationship between gross margin and its underlying price, discount and unit cost components.
 
