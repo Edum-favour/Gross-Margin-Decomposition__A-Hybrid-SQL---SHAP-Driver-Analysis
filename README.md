@@ -5,7 +5,7 @@ Between 2024 and 2025, the business delivered strong top-line revenue growth, wi
 This divergence creates a fundamental profitability question:
 > **Why did substantial revenue growth produce almost no corresponding growth in gross profit?**
 
-These headline metrics reveal the scale of margin compression, but not it's underlying causes. 
+These headline metrics reveal the scale of margin compression, but not its underlying causes. 
 Understanding what absorbed the benefit of revenue growth and where those pressures originated, is therefore the central focus of this analysis.
 
 
@@ -85,7 +85,7 @@ CROSS JOIN totals t;
 | Driver | Gross Profit Impact | Key Insight |
 |---|---:|---|
 | Volume | +$936.6K | Strong demand; volume expanded substantially YoY. |
-| Realized Price | +$135.1K | Modest list price adjustments offered minor support. |
+| Realized Price | +$135.1K | Modest realized price improvement offered minor support. |
 | Mix | -$110.8K | Shift in customer purchases towards lower-margin SKUs. |
 | Cost | -$859.1K | Unit cost inflation absorbed 91.7% of volume profit gains. |
 
@@ -101,7 +101,7 @@ SKUs P011 (-$18.7K), P004 (−$18.4K), P001 (−$15.5K), P009 (−$15.3K) and P0
 - Small Appliances (Favourable Mix Drivers):
 SKUs P021 (+$39.0K), P023 (+$34.9K), and P022 (+$24.3K) generated mix effects of +$41.9k, +$38.5k, and +$31.9k respectively, absorbing cost increases and boosting total profitability.
 
-- The P027 Pradox (Unprofitable Volume):
+- The P027 Paradox (Unprofitable Volume):
 P027 generated +$94.1k in volume gains but suffered a -$63.4k mix drag and -$52.2k cost inflation, leaving net gross profit -$9.1k lower than in 2024. 
 This highlights that top-line volume growth without margin controls erodes enterprise value.
 
@@ -215,7 +215,7 @@ shap.dependence_plot(
 
 1. Targeted Cost Recovery in Electronics: Renegotiate procurement terms, source alternative suppliers, or selectively pass cost increases through to customers for high-drag Electronics SKUs (P011, P004, P001, P009, P006).
 
-2. Protect and Scale Small Appliances: Capitalize on strong demand and favorable mix shifts in SKUs P021, P023, and P022 by allocating marketing spend and ensuring stock availability.
+2. Protect and Scale Small Appliances: Capitalize on strong demand and favorable mix shifts in SKUs P021, P023, and P022 by ensuring inventory availability and prioritizing commercial focus.
 
 3. Prioritize Profitable Volume Growth: Protect top-line momentum while aligning sales growth with net profitability. Restructure commercial and supply terms for SKUs like P027 so that increasing volume builds, rather than erodes gross profit.
 
